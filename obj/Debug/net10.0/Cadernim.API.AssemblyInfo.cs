@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Cadernim.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+79e0f76f357839249747203c3844fdcf3851d99e")]
 [assembly: System.Reflection.AssemblyProductAttribute("Cadernim.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Cadernim.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
