@@ -1,10 +1,15 @@
+using System.Collections.Generic;
 namespace Cadernim.API.Models
 {
     public class Receita
     {
+        public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
+        
+        //FK Ingredientes
         public List<Ingrediente> Ingredientes { get; set; } = new List<Ingrediente>();
+        
         public void CalcularPesos(double pesoTotalDesejadoG)
         {
             foreach (var ingrediente in Ingredientes)
