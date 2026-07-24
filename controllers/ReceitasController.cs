@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Cadernim.API.Repositories;
 using Cadernim.API.Models;
 using Cadernim.API.DTOs;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cadernim.API.Controllers
 {
@@ -9,22 +12,24 @@ namespace Cadernim.API.Controllers
     [Route("api/[controller]")]
     public class ReceitasController : ControllerBase
     {
-        // 1. Rota para salvar uma receita no livro (POST api/receitas)
+        private readonly IReceitaRepository _receitaRepository;
+
+        public ReceitasController(IReceitaRepository receitaRepository)
+        {
+            _receitaRepository = receitaRepository;
+        }
+
         [HttpPost]
-        public IActionResult CriarReceita([FromBody] ReceitaInputDTO input)
+        public async Task<IActionResult> CriarReceita([FromBody] ReceitaInputDTO input)
         {
             if (input == null || input.Ingredientes.Count == 0)
-            {
-                return BadRequest("A receita deve conter pelo menos um ingrediente.");
-            }
+                return BadRequest("A receita precisa de ingredientes.");
 
-            // Verificação de negócio: A soma das porcentagens dos ingredientes deve ser igual a 100%
-            double totalPorcentagens = input.Ingredientes.Sum(i => i.Porcentagem);
-            if (System.Math.Abs(totalPorcentagens - 1.0) > 0.001)
-            {
-                return BadRequest("A soma das porcentagens dos ingredientes deve ser igual a 100%.");
-            }
+            double somaPorcentagens = input.Ingredientes.Sum(i => i.Porcentagem);
+            if (System.Math.Abs(somaPorcentagens - 1.0) > 0.001)
+                return BadRequest("A soma das porcentagens deve ser exatamente 100%.");
 
+            // Criamos a nova receita do absoluto zero (sem setar o Id, deixando ele começar em 0 para o banco preencher)
             var novaReceita = new Receita
             {
                 Nome = input.Nome,
@@ -36,28 +41,17 @@ namespace Cadernim.API.Controllers
                 }).ToList()
             };
 
-            // Memória provisória: Adiciona a receita à lista estática do repositório
-            ReceitaRepository.AdicionarReceita(novaReceita);
-            return Ok($"Receita criada com sucesso: {novaReceita.Nome}");
+            // Chamamos o método do repositório
+            await _receitaRepository.AdicionarAsync(novaReceita); 
+
+            return Ok($"Receita '{novaReceita.Nome}' salva com sucesso no PostgreSQL com o ID {novaReceita.Id}!");
         }
 
-        // 2. Rota para obter uma receita por nome (GET api/receitas/{nome})
-        [HttpGet("{nome}")]
-        public IActionResult ObterReceita(string nome)
-        {
-            var receita = ReceitaRepository.ObterReceitaPorNome(nome);
-            if (receita == null)
-            {
-                return NotFound();
-            }
-            return Ok(receita);
-        }
-
-        // 3. Rota para listar todas as receitas (GET api/receitas)
         [HttpGet]
-        public IActionResult ObterTodasReceitas()
+        public async Task<IActionResult> ListarTodas()
         {
-            var receitas = ReceitaRepository.ObterTodasReceitas();
+            // O Include garante que os ingredientes venham junto com a receita
+            var receitas = await _receitaRepository.ObterTodasAsync();
             return Ok(receitas);
         }
     }

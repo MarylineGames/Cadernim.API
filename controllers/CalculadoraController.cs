@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-//Minhas classes de modelo e DTOs ^v^-
+//Minhas classes de modelo, DTOs e repositórios ^v^-
 using Cadernim.API.Models;
 using Cadernim.API.DTOs;
+using Cadernim.API.Repositories;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cadernim.API.Controllers
 {
@@ -11,6 +13,12 @@ namespace Cadernim.API.Controllers
     [Route("api/[controller]")]
     public class CalculadoraController : ControllerBase
     {
+        private readonly IReceitaRepository _receitaRepository;
+        public CalculadoraController(IReceitaRepository receitaRepository)
+        {
+            _receitaRepository = receitaRepository;
+        }
+
         [HttpPost("escalar")]
         public IActionResult EscalarReceita([FromBody] ReceitaInputDTO input)
         {
@@ -47,7 +55,7 @@ namespace Cadernim.API.Controllers
 
         // Rota para calcular os pesos dos ingredientes de uma receita existente por nome
         [HttpGet("calcular-por-nome")]
-        public IActionResult CalcularPorNome([FromQuery] string nomeReceita, [FromQuery] double pesoTotalDesejadoG)
+        public async Task<IActionResult> CalcularPorNome([FromQuery] string nomeReceita, [FromQuery] double pesoTotalDesejadoG)
         {
             // Validações básicas
             if (string.IsNullOrWhiteSpace(nomeReceita))
@@ -60,7 +68,7 @@ namespace Cadernim.API.Controllers
             }
 
             // Busca a receita pelo nome no repositório
-            var receita = ReceitaRepository.ObterReceitaPorNome(nomeReceita);
+            var receita = await _receitaRepository.ObterPorNomeAsync(nomeReceita);
             if (receita == null)
             {
                 return NotFound($"Receita '{nomeReceita}' não encontrada.");
