@@ -44,7 +44,7 @@ namespace Cadernim.API.Controllers
             // Chamamos o método do repositório
             await _receitaRepository.AdicionarAsync(novaReceita); 
 
-            return Ok($"Receita '{novaReceita.Nome}' salva com sucesso no PostgreSQL com o ID {novaReceita.Id}!");
+            return Ok(novaReceita);
         }
 
         [HttpGet]
